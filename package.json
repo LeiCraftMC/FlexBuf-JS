@@ -1,0 +1,47 @@
+{
+    "name": "flexbuf",
+    "version": "1.0.0",
+    "module": "./dist/esm/index.js",
+    "main": "./dist/cjs/index.js",
+    "types": "./dist/types/index.d.ts",
+    "scripts": {
+        "test": "bun test",
+        "build": "bun run build:esm && bun run build:cjs && bun run build:types",
+        "build:esm": "rm -rf dist/esm && tsc -p tsconfig.esm.json",
+        "build:cjs": "rm -rf dist/cjs && tsc -p tsconfig.cjs.json",
+        "build:types": "rm -rf dist/types && tsc -p tsconfig.types.json",
+        "release": "bun run build && bun run test && bun publish"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/LeiCraftMC/FlexBuf-JS"
+    },
+    "author": "LeiCraft_",
+    "publisher": "LeiCraft_MC",
+    "license": "AGPL-3.0-only",
+    "bugs": {
+        "url": "https://github.com/LeiCraftMC/FlexBuf-JS/issues"
+    },
+    "keywords": [
+        "JavaScript",
+        "TypeScript",
+        "Serializer",
+        "Deserializer",
+        "FlexBuf",
+        "Buffer",
+        "Encoder",
+        "Decoder"
+    ],
+    "homepage": "https://github.com/LeiCraftMC/FlexBuf-JS#readme",
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@types/node": "^22.13.5",
+        "typescript": "^5.7.3"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "dependencies": {
+        "low-level": "^1.0.15"
+    }
+}
