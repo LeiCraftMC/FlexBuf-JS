@@ -7,11 +7,13 @@
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
     "paths": {
       "flexbuf": ["./src/index.ts"]
     }
   },
 	"include": [
     "src/**/*",
+    "tests/**/*"
   ]
 }
