@@ -1,4 +1,5 @@
-import { Uint } from "low-level";
+import { Uint, Uint256 } from "low-level";
+import { createHash } from "crypto";
 
 export class Utils {
 
@@ -21,6 +22,14 @@ export class Utils {
             parseInt(base15Length, 15),
             Math.ceil((base15Length.length + 1) / 2)
         ];
+    }
+
+    static sha256(input: Uint) {
+        return new Uint256(
+            createHash('sha256')
+                .update(input.getRaw())
+                .digest()
+        );
     }
 
 }
