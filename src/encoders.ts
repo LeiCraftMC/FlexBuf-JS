@@ -25,7 +25,7 @@ export abstract class DataEncoder {
 
     constructor(
         readonly key: string,
-        readonly hashRemove: boolean
+        readonly hashRemove = false
     ) {}
 
     abstract encode(v: any): Uint[] | null;
@@ -42,7 +42,7 @@ class ArrayEncoder extends DataEncoder {
         key: string,
         protected readonly prefixLength: number | "unlimited",
         protected readonly targetObject: EncodeableObj,
-        hashRemove: boolean
+        hashRemove = false
     ) {
         super(key, hashRemove);
     }
@@ -98,7 +98,7 @@ class ObjectEncoder extends DataEncoder {
     constructor(
         key: string,
         protected readonly targetObject: EncodeableObj,
-        hashRemove: boolean
+        hashRemove = false
     ) {
         super(key, hashRemove);
     }
@@ -159,7 +159,7 @@ class FixedUintEncoder<T extends FixedUint> extends DataEncoder {
     constructor(
         protected readonly CLS: FixedUintConstructor<T>,
         key: string,
-        hashRemove: boolean
+        hashRemove = false
     ) {
         super(key, hashRemove);
     }
@@ -181,8 +181,8 @@ class FixedUintEncoder<T extends FixedUint> extends DataEncoder {
 }
 
 
-type CustomEncodeFn<T = any> = (v: T) => Uint;
-type CustomDecodeFn<T = any> = (v: Uint) => T;
+type CustomEncodeFn<T = any> = (value: T) => Uint;
+type CustomDecodeFn<T = any> = (hexData: Uint) => T;
 
 type CustomEncoderLengthArg = { type: "prefix", val: number | "unlimited"} | { type: "fixed", val: number };
 
@@ -191,12 +191,12 @@ class CustomEncoder<T = Uint> extends DataEncoder {
     protected readonly prefixLength?: number | "unlimited";
     protected readonly fixedLength?: number;
 
-    constructor(key: string, length: CustomEncoderLengthArg, hashRemove: boolean);
+    constructor(key: string, length: CustomEncoderLengthArg, hashRemove?: boolean);
     constructor(key: string, length: CustomEncoderLengthArg, hashRemove: boolean, encodeFN: CustomEncodeFn<T>, decodeFN: CustomDecodeFn<T>);
     constructor(
         key: string,
         length: CustomEncoderLengthArg,
-        hashRemove: boolean,
+        hashRemove = false,
         protected readonly encodeFN?: CustomEncodeFn<T>,
         protected readonly decodeFN?: CustomDecodeFn<T>
     ) {
@@ -269,38 +269,43 @@ class CustomEncoder<T = Uint> extends DataEncoder {
 
 }
 
+function createEncoderConstructor<const T extends new (...args: any[]) => I, const I extends DataEncoder = InstanceType<T>>(CLS: T) {
+    return (...args: ConstructorParameters<T>) => new CLS(...args);
+}
+
 export function BE<T extends FixedUint>(CLS: FixedUintConstructor<T>, key: string, hashRemove = false) {
     return new FixedUintEncoder(CLS, key, hashRemove);
 }
 
+/**
+ * Basic Types
+ */
 export namespace BE {
-    export const BigInt = (key: string, hashRemove = false) => new BigIntEncoder(key, hashRemove);
-    export const Bool = (key: string, hashRemove = false) => new BoolEncoder(key, hashRemove);
+    export const BigInt = createEncoderConstructor(BigIntEncoder);
+    export const Bool = createEncoderConstructor(BoolEncoder);
 
-    export const Array = (
-        key: string,
-        prefixLength: number | "unlimited",
-        targetObject: EncodeableObj,
-        hashRemove = false
-    ) => new ArrayEncoder(key, prefixLength, targetObject, hashRemove);
-
-    export const Object = (
-        key: string,
-        targetObject: EncodeableObj,
-        hashRemove = false
-    ) => new ObjectEncoder(key, targetObject, hashRemove);
+    export const Array = createEncoderConstructor(ArrayEncoder);
+    export const Object = createEncoderConstructor(ObjectEncoder);
 
     export function Custom(key: string, length: CustomEncoderLengthArg, hashRemove?: boolean): CustomEncoder<Uint>;
     export function Custom<T>(key: string, length: CustomEncoderLengthArg, hashRemove: boolean, encodeFN: CustomEncodeFn<T>, decodeFN: CustomDecodeFn<T>): CustomEncoder<T>;
-    export function Custom(
-        key: string,
-        length: CustomEncoderLengthArg,
-        hashRemove = false,
-        encodeFN?: any,
-        decodeFN?: any
-    ) {
+    export function Custom(key: string, length: CustomEncoderLengthArg, hashRemove = false, encodeFN?: any, decodeFN?: any) {
         return new CustomEncoder<any>(key, length, hashRemove, encodeFN, decodeFN);
     };
 }
+
+/**
+ * More Advanced Types
+ */
+export namespace BE {
+    export function Str(key: string, hashRemove = false) { 
+        return new CustomEncoder(
+            key, { type: "prefix", val: "unlimited" },hashRemove,
+            (v: string) => Uint.from(v, "utf8"),
+            (v: Uint) => v.toString("utf8")
+        );
+    };
+}
+
 export { BE as BEncoder };
 
