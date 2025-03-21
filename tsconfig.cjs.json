@@ -4,7 +4,8 @@
 		"outDir": "./dist/cjs",
 		"declaration": true,
 		"module": "commonjs",
-		"removeComments": false
+		"removeComments": false,
+		"verbatimModuleSyntax": false
 	},
 	"include": ["src/**/*"]
 }
