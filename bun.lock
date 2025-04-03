@@ -4,7 +4,7 @@
     "": {
       "name": "low-level",
       "dependencies": {
-        "low-level": "^1.0.15",
+        "low-level": "latest",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -22,7 +22,7 @@
 
     "bun-types": ["bun-types@1.2.5", "", { "dependencies": { "@types/node": "*", "@types/ws": "~8.5.10" } }, "sha512-3oO6LVGGRRKI4kHINx5PIdIgnLRb7l/SprhzqXapmoYkFl5m4j6EvALvbDVuuBFaamB46Ap6HCUxIXNLCGy+tg=="],
 
-    "low-level": ["low-level@1.0.15", "", {}, "sha512-wQ8O6wbMnNRcKopvjky6DBWUuYnAkerj9SVpYGBSw5zRskyRoC2mCoagaLjYogwQUxKx5VyqFHPIhDCX3Dk79w=="],
+    "low-level": ["low-level@1.0.16", "", {}, "sha512-xfLKdx3yUstOLlTi+ymQqFDl9KRXPLeY75uP7lDjVn177lCxzR1SAD2mAMg9BZdaKXP/r5dV4akyeLz7n+J7Fg=="],
 
     "typescript": ["typescript@5.7.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw=="],
 
