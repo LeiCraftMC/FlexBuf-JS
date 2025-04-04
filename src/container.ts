@@ -1,5 +1,5 @@
-import { Uint } from "low-level";
-import { DataEncoder, ObjectEncoding } from "flexbuf";
+import type { Uint, Uint256 } from "low-level";
+import { type DataEncoder, ObjectEncoding } from "flexbuf";
 import { Utils } from "./utils";
 
 type NewContainer<T extends Container> = new (...args: any[]) => T;
@@ -50,6 +50,14 @@ export abstract class Container {
 export abstract class HashableContainer extends Container {
     public calculateHash() {
         return Utils.sha256(this.encodeToHex(true));
+    }
+
+    public validateHash(hash: Uint256) {
+        try {
+            return this.calculateHash().eq(hash);
+        } catch {
+            return false;
+        }
     }
 }
 
