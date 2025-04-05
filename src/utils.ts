@@ -26,7 +26,7 @@ export class Utils {
 
     static sha256(input: Uint) {
         return new Uint256(
-            createHash('sha256')
+            createHash('sha3-256')
                 .update(input.getRaw())
                 .digest()
         );
