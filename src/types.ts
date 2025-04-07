@@ -8,10 +8,13 @@ export interface EncodeableObjInstance {
     encodeToHex(forHash: boolean): Uint;
 }
 
-export interface EncodeableObj {
-    new(...args: any[]): EncodeableObjInstance;
-    prototype: EncodeableObjInstance;
-    fromDecodedHex(hexData: Uint, returnLength: boolean): { data: EncodeableObjInstance, length: number } | EncodeableObjInstance | null;
+export interface EncodeableObj<I extends EncodeableObjInstance = EncodeableObjInstance> {
+    new(...args: any[]): I;
+    prototype: I;
+    fromDecodedHex(hexData: Uint, returnLength: boolean): {
+        data: I,
+        length: number
+    } | I | null;
 }
 
 
