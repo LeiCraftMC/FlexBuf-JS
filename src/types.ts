@@ -11,6 +11,8 @@ export interface EncodeableObjInstance {
 export interface EncodeableObj<I extends EncodeableObjInstance = EncodeableObjInstance> {
     new(...args: any[]): I;
     prototype: I;
+    fromDecodedHex(hexData: Uint, returnLength?: false): I | null;
+    fromDecodedHex(hexData: Uint, returnLength: true): { data: I, length: number } | null;
     fromDecodedHex(hexData: Uint, returnLength: boolean): {
         data: I,
         length: number
