@@ -1,24 +1,7 @@
 import { type FixedUint, Uint64, Uint8 } from "low-level";
 import { Uint } from "low-level";
-import type { AnyObj } from "./types.js";
+import type { AnyObj, EncodeableObj, FixedUintConstructor } from "./types.js";
 import { Utils } from "./utils.js";
-
-
-interface EncodeableObjInstance {
-    encodeToHex(forHash: boolean): Uint;
-}
-
-interface EncodeableObj {
-    new(...args: any[]): EncodeableObjInstance;
-    prototype: EncodeableObjInstance;
-    fromDecodedHex(hexData: Uint, returnLength: boolean): { data: EncodeableObjInstance, length: number } | EncodeableObjInstance | null;
-}
-
-
-interface FixedUintConstructor<T extends FixedUint> {
-    readonly byteLength: number;
-    create: (v: Uint | Buffer) => T;
-}
 
 
 export abstract class DataEncoder {
