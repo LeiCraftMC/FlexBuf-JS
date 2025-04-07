@@ -42,6 +42,6 @@
         "access": "public"
     },
     "dependencies": {
-        "low-level": "latest"
+        "low-level": "^1.0.17"
     }
 }
