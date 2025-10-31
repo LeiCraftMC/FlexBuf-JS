@@ -2,6 +2,16 @@ import { describe, test, expect } from "bun:test";
 import { BE, Container, DataEncoder, HashableContainer } from "flexbuf";
 import { Uint16, Uint256, Uint64 } from "low-level";
 
+enum CarType {
+    SEDAN = 0x00,
+    SUV = 0x01,
+    TRUCK = 0x02,
+    COUPE = 0x03,
+    CONVERTIBLE = 0x04
+}
+
+const CarTypes: CarType[] = Object.values(CarType).filter(v => typeof v === "number") as CarType[];
+
 class CarInspectionData extends Container {
     constructor(
         readonly date: Uint64,
@@ -38,6 +48,7 @@ class CarData extends HashableContainer {
     constructor(
         readonly version: Uint16,
         readonly registrationDate: Uint64,
+        readonly model: CarType,
         readonly hash: Uint256,
         readonly inspections: CarInspectionData[],
         readonly owner: CarOwnerData
@@ -47,6 +58,7 @@ class CarData extends HashableContainer {
         const carData = new CarData(
             obj.version,
             obj.registrationDate,
+            obj.model,
             obj.hash,
             obj.inspections,
             obj.owner
@@ -59,6 +71,7 @@ class CarData extends HashableContainer {
     protected static encodingSettings: readonly DataEncoder[] = [
         BE(Uint16, "version"),
         BE.BigInt("registrationDate"),
+        BE.Enum("model", 1, new Set(CarTypes)),
         BE(Uint256, "hash", true),
         BE.Array("inspections", "unlimited", CarInspectionData),
         BE.Object("owner", CarOwnerData)
@@ -76,6 +89,7 @@ class CarData extends HashableContainer {
         const car = new CarData(
             Uint16.from(randInt(65536)),
             Uint64.from(randInt(2**64)),
+            randInt(5),
             Uint256.empty(),
             Array.from({length: randInt(2)},
                 () => new CarInspectionData(
@@ -108,6 +122,19 @@ describe("basic_encodings", () => {
         expect(JSON.stringify(decoded?.data)).toBe(JSON.stringify(car));
     });
 
+    test("invalid_enum_value", () => {
 
+        const car = CarData.createRandomCarData();
+
+        //@ts-ignore
+        car.model = 0xFF;
+
+        car.hash.set(car.calculateHash());
+
+        const encoded = car.encodeToHex();
+        const decoded = CarData.fromDecodedHex(encoded, true);
+        
+        expect(decoded).toBeNull();
+    });
 
 });

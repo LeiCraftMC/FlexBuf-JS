@@ -137,6 +137,42 @@ class BoolEncoder extends DataEncoder {
     }
 }
 
+class EnumEncoder extends DataEncoder {
+
+    constructor(
+        key: string,
+        protected readonly byteLength: number,
+        protected readonly allowedValues?: Set<number>,
+        hashRemove?: boolean
+    ) {
+        super(key, hashRemove);
+    }
+
+    public encode(value: number) {
+        const hexValue = Uint.from(value, this.byteLength);
+        return [hexValue];
+    }
+
+    public decode(hexData: Uint) {
+        const hexValue = hexData.slice(0, this.byteLength);
+        if (hexValue.getLen() !== this.byteLength) {
+            return null;
+        }
+
+        const value = hexValue.toInt();
+        if (this.allowedValues && !this.allowedValues.has(value)) {
+            return null;
+        }
+
+        return {
+            data: value,
+            length: this.byteLength
+        };
+    }
+
+}
+
+
 class FixedUintEncoder<T extends FixedUint> extends DataEncoder {
 
     constructor(
@@ -266,6 +302,7 @@ export function BE<T extends FixedUint>(CLS: FixedUintConstructor<T>, key: strin
 export namespace BE {
     export const BigInt = createEncoderConstructor(BigIntEncoder);
     export const Bool = createEncoderConstructor(BoolEncoder);
+    export const Enum = createEncoderConstructor(EnumEncoder);
 
     export const Array = createEncoderConstructor(ArrayEncoder);
     export const Object = createEncoderConstructor(ObjectEncoder);

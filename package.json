@@ -35,13 +35,13 @@
     "homepage": "https://github.com/LeiCraftMC/FlexBuf-JS#readme",
     "devDependencies": {
         "@types/bun": "latest",
-        "@types/node": "^22.13.5",
-        "typescript": "^5.7.3"
+        "@types/node": "^22.18.13",
+        "typescript": "^5.9.3"
     },
     "publishConfig": {
         "access": "public"
     },
     "peerDependencies": {
-        "low-level": ">=1.0.17"
+        "low-level": "^1.0.17"
     }
 }
