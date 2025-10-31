@@ -142,7 +142,7 @@ class EnumEncoder extends DataEncoder {
     constructor(
         key: string,
         protected readonly byteLength: number,
-        protected readonly allowedValues?: Set<number>,
+        protected readonly allowedValues?: ReadonlySet<number>,
         hashRemove?: boolean
     ) {
         super(key, hashRemove);
