@@ -19,18 +19,23 @@ export abstract class DataEncoder {
 
 }
 
-class ArrayEncoder extends DataEncoder {
-    
+type PrefixLengthArg = number | "unlimited";
+
+type CustomArrayEncodeFn<T = any> = (item: T) => Uint[] | null;
+type CustomArrayDecodeFn<T = any> = (hexData: Uint) => { data: T, length: number } | null;
+
+class CustomArrayEncoder<T = any> extends DataEncoder {
     constructor(
         key: string,
-        protected readonly prefixLength: number | "unlimited",
-        protected readonly targetObject: EncodeableObj,
+        protected readonly prefixLength: PrefixLengthArg ,
+        protected readonly encodeFN: CustomArrayEncodeFn<T>,
+        protected readonly decodeFN: CustomArrayDecodeFn<T>,
         hashRemove = false
     ) {
         super(key, hashRemove);
     }
 
-    public encode(array: any[]) {
+    public encode(array: T[]) {
         const result: Uint[] = [];
 
         // length check implemeting later
@@ -41,7 +46,9 @@ class ArrayEncoder extends DataEncoder {
         }
 
         for (let item of array) {
-            result.push(this.targetObject.prototype.encodeToHex.call(item, false));
+            const encodedItem = this.encodeFN(item);
+            if (!encodedItem) return null;
+            result.push(...encodedItem);
         }
 
         return result;
@@ -62,7 +69,8 @@ class ArrayEncoder extends DataEncoder {
         let total_arrayLength = prefixLength;
             
         for (let i = 0; i < arrayCount; i++) {
-            const array_item = this.targetObject.fromDecodedHex(arrayData, true) as { data: any, length: number };
+            const array_item = this.decodeFN(arrayData);
+            if (!array_item) return null;
             final_array.push(array_item.data);
             arrayData = arrayData.slice(array_item.length);
             total_arrayLength += array_item.length;
@@ -72,6 +80,23 @@ class ArrayEncoder extends DataEncoder {
             data: final_array,
             length: total_arrayLength
         };
+    }
+
+}
+
+class ArrayEncoder extends CustomArrayEncoder {
+    
+    constructor(
+        key: string,
+        prefixLength: PrefixLengthArg ,
+        protected readonly targetObject: EncodeableObj,
+        hashRemove = false
+    ) {
+        super(key, prefixLength,
+            (item: any) => {return [targetObject.prototype.encodeToHex.call(item, false)]},
+            (hexData: Uint) => targetObject.fromDecodedHex(hexData, true),
+            hashRemove
+        );
     }
 
 }
@@ -203,11 +228,11 @@ class FixedUintEncoder<T extends FixedUint> extends DataEncoder {
 type CustomEncodeFn<T = any> = (value: T) => Uint;
 type CustomDecodeFn<T = any> = (hexData: Uint) => T;
 
-type CustomEncoderLengthArg = { type: "prefix", val: number | "unlimited"} | { type: "fixed", val: number };
+type CustomEncoderLengthArg = { type: "prefix", val: PrefixLengthArg } | { type: "fixed", val: number };
 
 class CustomEncoder<T = Uint> extends DataEncoder {
 
-    protected readonly prefixLength?: number | "unlimited";
+    protected readonly prefixLength?: PrefixLengthArg ;
     protected readonly fixedLength?: number;
 
     constructor(key: string, length: CustomEncoderLengthArg, hashRemove?: boolean);
@@ -312,6 +337,10 @@ export namespace BE {
     export function Custom(key: string, length: CustomEncoderLengthArg, hashRemove = false, encodeFN?: any, decodeFN?: any) {
         return new CustomEncoder<any>(key, length, hashRemove, encodeFN, decodeFN);
     };
+
+    export function CustomArray<T = any>(key: string, prefixLength: PrefixLengthArg , encodeFN: CustomArrayEncodeFn<T>, decodeFN: CustomArrayDecodeFn<T>, hashRemove = false) {
+        return new CustomArrayEncoder<T>(key, prefixLength, encodeFN, decodeFN, hashRemove);
+    }
 }
 
 /**

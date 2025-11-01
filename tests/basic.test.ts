@@ -31,16 +31,23 @@ class CarInspectionData extends Container {
 class CarOwnerData extends Container {
     constructor(
         readonly name: string,
-        readonly age: Uint16
+        readonly age: Uint16,
+        readonly ownerHistory: string[]
     ) {super()}
 
     protected static fromDict(obj: Dict<any>) {
-        return new CarOwnerData(obj.name, obj.age);
+        return new CarOwnerData(obj.name, obj.age, obj.ownerHistory);
     }
 
     protected static encodingSettings: readonly DataEncoder[] = [
         BE.Str("name"),
-        BE(Uint16, "age")
+        BE(Uint16, "age"),
+        BE.CustomArray<string>(
+            "ownerHistory",
+            "unlimited",
+            (item) => BE.Str("").encode(item),
+            (hexData) =>  BE.Str("").decode(hexData)
+        )
     ]
 }
 
@@ -91,7 +98,7 @@ class CarData extends HashableContainer {
             Uint64.from(randInt(2**64)),
             randInt(5),
             Uint256.empty(),
-            Array.from({length: randInt(2)},
+            Array.from({length: randInt(10)},
                 () => new CarInspectionData(
                     Uint64.from(randInt(2**32)),
                     randBool()
@@ -100,7 +107,8 @@ class CarData extends HashableContainer {
 
             new CarOwnerData(
                 randStr(randInt(100)),
-                Uint16.from(randInt(65536))
+                Uint16.from(randInt(65536)),
+                Array.from({length: randInt(5)}, () => randStr(randInt(50)))
             )
         );
 
