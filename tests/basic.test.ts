@@ -42,11 +42,12 @@ class CarOwnerData extends Container {
     protected static encodingSettings: readonly DataEncoder[] = [
         BE.Str("name"),
         BE(Uint16, "age"),
-        BE.CustomArray<string>(
+        BE.CustomArray(
             "ownerHistory",
             "unlimited",
-            (item) => BE.Str("").encode(item),
-            (hexData) =>  BE.Str("").decode(hexData)
+            (item: string, encoder) => encoder.encode(item),
+            (hexData, encoder) =>  encoder.decode(hexData),
+            BE.Str("")
         )
     ]
 }
